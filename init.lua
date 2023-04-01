@@ -1,5 +1,5 @@
--- Nvim Config 
--- Resources: 
+-- Nvim Config
+-- Resources:
 -- [https://github.com/nvim-lua/kickstart.nvim,
 -- https://github.com/nvim-lua/kickstart.nvim]
 -- Set <space> as the leader key
@@ -7,9 +7,8 @@
 --  NOTE: Must happen before plugins are required (otherwise wrong leader will be used)
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
--- 
+--
 require("myconfig")
-
 
 
 
@@ -87,10 +86,10 @@ require('lazy').setup({
   },
   {
     'rose-pine/neovim',
-    name='rose-pine',
-    config= function()
+    name = 'rose-pine',
+    config = function()
       require('rose-pine').setup({
-        disable_italics=true
+        disable_italics = true
       })
       vim.cmd('colorscheme rose-pine')
     end
@@ -149,7 +148,7 @@ require('lazy').setup({
       pcall(require('nvim-treesitter.install').update { with_sync = true })
     end,
   },
-   -- Tree like file explorer 
+  -- Tree like file explorer
   {
     'nvim-tree/nvim-tree.lua',
     dependencies = {
@@ -163,6 +162,9 @@ require('lazy').setup({
         }
       })
     end,
+  },
+  {
+    "jose-elias-alvarez/null-ls.nvim",
   },
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
@@ -291,6 +293,16 @@ mason_lspconfig.setup_handlers {
   end,
 }
 
+-- local lspconfig = require('lspconfig')
+-- lspconfig.eslint.setup({
+--   --- ...
+--   on_attach = function(client, bufnr)
+--     vim.api.nvim_create_autocmd("BufWritePre", {
+--       buffer = bufnr,
+--       command = "EslintFixAll",
+--     })
+--   end,
+-- })
 -- nvim-cmp setup
 local cmp = require 'cmp'
 local luasnip = require 'luasnip'
@@ -304,14 +316,14 @@ cmp.setup {
     end,
   },
   mapping = cmp.mapping.preset.insert {
-        ['<C-d>'] = cmp.mapping.scroll_docs(-4),
-        ['<C-f>'] = cmp.mapping.scroll_docs(4),
-        ['<C-Space>'] = cmp.mapping.complete {},
-        ['<CR>'] = cmp.mapping.confirm {
+    ['<C-d>'] = cmp.mapping.scroll_docs(-4),
+    ['<C-f>'] = cmp.mapping.scroll_docs(4),
+    ['<C-Space>'] = cmp.mapping.complete {},
+    ['<CR>'] = cmp.mapping.confirm {
       behavior = cmp.ConfirmBehavior.Replace,
       select = true,
     },
-        ['<Tab>'] = cmp.mapping(function(fallback)
+    ['<Tab>'] = cmp.mapping(function(fallback)
       if cmp.visible() then
         cmp.select_next_item()
       elseif luasnip.expand_or_jumpable() then
@@ -320,7 +332,7 @@ cmp.setup {
         fallback()
       end
     end, { 'i', 's' }),
-        ['<S-Tab>'] = cmp.mapping(function(fallback)
+    ['<S-Tab>'] = cmp.mapping(function(fallback)
       if cmp.visible() then
         cmp.select_prev_item()
       elseif luasnip.jumpable(-1) then
@@ -335,6 +347,36 @@ cmp.setup {
     { name = 'luasnip' },
   },
 }
+local lspconfig = require('lspconfig')
+local function organize_imports()
+  local params = {
+    command = "_typescript.organizeImports",
+    arguments = {vim.api.nvim_buf_get_name(0)},
+    title = ""
+  }
+  vim.lsp.buf.execute_command(params)
+end
+
+lspconfig.tsserver.setup {
+  on_attach = on_attach,
+  capabilities = capabilities,
+  commands = {
+    OrganizeImports = {
+      organize_imports,
+      description = "Organize Imports"
+    }
+  }
+}
+lspconfig.eslint.setup({
+  --- ...
+  on_attach = function(client, bufnr)
+    vim.api.nvim_create_autocmd("BufWritePre", {
+      buffer = bufnr,
+      command = "EslintFixAll",
+    })
+  end,
+})
+print(lspconfig.eslint)
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
